@@ -10,7 +10,7 @@ const DOT = 1;
 const EMPTY = 2;
 
 // Game state
-let pacman = { x: 14, y: 23 };
+let pacman = { x: 14, y: 23, direction: 0 };
 let ghosts = [
     { x: 14, y: 11, color: 'red' },
     { x: 13, y: 11, color: 'pink' },
@@ -135,7 +135,11 @@ function draw() {
     }
 
     // Draw Pacman
-    ctx.drawImage(pacmanImg, pacman.x * CELL_SIZE + (CELL_SIZE - PACMAN_SIZE) / 2, pacman.y * CELL_SIZE + (CELL_SIZE - PACMAN_SIZE) / 2, PACMAN_SIZE, PACMAN_SIZE);
+    ctx.save();
+    ctx.translate(pacman.x * CELL_SIZE + CELL_SIZE / 2, pacman.y * CELL_SIZE + CELL_SIZE / 2);
+    ctx.rotate(pacman.direction * Math.PI / 180);
+    ctx.drawImage(pacmanImg, -PACMAN_SIZE / 2, -PACMAN_SIZE / 2, PACMAN_SIZE, PACMAN_SIZE);
+    ctx.restore();
 
     // Draw Ghosts
     ghosts.forEach(ghost => {
@@ -154,7 +158,7 @@ function draw() {
 
 // Reset game state
 function resetGame() {
-    pacman = { x: 14, y: 23 };
+    pacman = { x: 14, y: 23, direction: 0 };
     ghosts = [
         { x: 14, y: 11, color: 'red' },
         { x: 13, y: 11, color: 'pink' },
@@ -182,25 +186,31 @@ document.addEventListener('keydown', (e) => {
 
     let newX = pacman.x;
     let newY = pacman.y;
+    let newDirection = pacman.direction;
 
     switch (key) {
         case 'ArrowUp':
             newY--;
+            newDirection = 270;
             break;
         case 'ArrowDown':
             newY++;
+            newDirection = 90;
             break;
         case 'ArrowLeft':
             newX--;
+            newDirection = 180;
             break;
         case 'ArrowRight':
             newX++;
+            newDirection = 0;
             break;
     }
 
     if (maze[newY][newX] !== WALL) {
         pacman.x = newX;
         pacman.y = newY;
+        pacman.direction = newDirection;
     }
 });
 
