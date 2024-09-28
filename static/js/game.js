@@ -11,7 +11,12 @@ const EMPTY = 2;
 
 // Game state
 let pacman = { x: 14, y: 23 };
-let ghost = { x: 14, y: 11 };
+let ghosts = [
+    { x: 14, y: 11, color: 'red' },
+    { x: 13, y: 11, color: 'pink' },
+    { x: 15, y: 11, color: 'cyan' },
+    { x: 14, y: 12, color: 'orange' }
+];
 let score = 0;
 let gameOver = false;
 
@@ -63,8 +68,6 @@ const ctx = canvas.getContext('2d');
 // Load images
 const pacmanImg = new Image();
 pacmanImg.src = '/static/images/pacman.svg';
-const ghostImg = new Image();
-ghostImg.src = '/static/images/ghost.svg';
 
 // Game loop
 function gameLoop() {
@@ -79,19 +82,21 @@ function gameLoop() {
 function update() {
     if (gameOver) return;
 
-    // Move ghost randomly
+    // Move ghosts randomly
     const directions = [{x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}];
-    const randomDir = directions[Math.floor(Math.random() * directions.length)];
-    const newGhostX = ghost.x + randomDir.x;
-    const newGhostY = ghost.y + randomDir.y;
+    ghosts.forEach(ghost => {
+        const randomDir = directions[Math.floor(Math.random() * directions.length)];
+        const newGhostX = ghost.x + randomDir.x;
+        const newGhostY = ghost.y + randomDir.y;
 
-    if (maze[newGhostY][newGhostX] !== WALL) {
-        ghost.x = newGhostX;
-        ghost.y = newGhostY;
-    }
+        if (maze[newGhostY][newGhostX] !== WALL) {
+            ghost.x = newGhostX;
+            ghost.y = newGhostY;
+        }
+    });
 
-    // Check collision with ghost
-    if (pacman.x === ghost.x && pacman.y === ghost.y) {
+    // Check collision with ghosts
+    if (ghosts.some(ghost => pacman.x === ghost.x && pacman.y === ghost.y)) {
         gameOver = true;
         gameOverSound.play();
     }
@@ -127,8 +132,13 @@ function draw() {
     // Draw Pacman
     ctx.drawImage(pacmanImg, pacman.x * CELL_SIZE + (CELL_SIZE - PACMAN_SIZE) / 2, pacman.y * CELL_SIZE + (CELL_SIZE - PACMAN_SIZE) / 2, PACMAN_SIZE, PACMAN_SIZE);
 
-    // Draw Ghost
-    ctx.drawImage(ghostImg, ghost.x * CELL_SIZE + (CELL_SIZE - GHOST_SIZE) / 2, ghost.y * CELL_SIZE + (CELL_SIZE - GHOST_SIZE) / 2, GHOST_SIZE, GHOST_SIZE);
+    // Draw Ghosts
+    ghosts.forEach(ghost => {
+        ctx.fillStyle = ghost.color;
+        ctx.beginPath();
+        ctx.arc(ghost.x * CELL_SIZE + CELL_SIZE / 2, ghost.y * CELL_SIZE + CELL_SIZE / 2, GHOST_SIZE / 2, 0, Math.PI * 2);
+        ctx.fill();
+    });
 
     if (gameOver) {
         ctx.fillStyle = 'red';
@@ -140,7 +150,12 @@ function draw() {
 // Reset game state
 function resetGame() {
     pacman = { x: 14, y: 23 };
-    ghost = { x: 14, y: 11 };
+    ghosts = [
+        { x: 14, y: 11, color: 'red' },
+        { x: 13, y: 11, color: 'pink' },
+        { x: 15, y: 11, color: 'cyan' },
+        { x: 14, y: 12, color: 'orange' }
+    ];
     score = 0;
     gameOver = false;
     maze = JSON.parse(JSON.stringify(initialMaze));
