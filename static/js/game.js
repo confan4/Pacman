@@ -20,7 +20,7 @@ const eatDotSound = new Audio('/static/audio/eat_dot.mp3');
 const gameOverSound = new Audio('/static/audio/game_over.mp3');
 
 // Maze layout
-const maze = [
+const initialMaze = [
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     [0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],
     [0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0],
@@ -53,6 +53,8 @@ const maze = [
     [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 ];
+
+let maze = JSON.parse(JSON.stringify(initialMaze));
 
 // Get canvas and context
 const canvas = document.getElementById('gameCanvas');
@@ -135,11 +137,28 @@ function draw() {
     }
 }
 
+// Reset game state
+function resetGame() {
+    pacman = { x: 14, y: 23 };
+    ghost = { x: 14, y: 11 };
+    score = 0;
+    gameOver = false;
+    maze = JSON.parse(JSON.stringify(initialMaze));
+    document.getElementById('scoreValue').textContent = score;
+}
+
 // Handle keyboard input
 document.addEventListener('keydown', (e) => {
+    const key = e.key;
+
+    if (key === 'Enter') {
+        resetGame();
+        gameLoop();
+        return;
+    }
+
     if (gameOver) return;
 
-    const key = e.key;
     let newX = pacman.x;
     let newY = pacman.y;
 
