@@ -19,6 +19,7 @@ let ghosts = [
 ];
 let score = 0;
 let gameOver = false;
+let frameCount = 0;
 
 // Audio
 const eatDotSound = new Audio('/static/audio/eat_dot.mp3');
@@ -82,18 +83,22 @@ function gameLoop() {
 function update() {
     if (gameOver) return;
 
-    // Move ghosts randomly
-    const directions = [{x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}];
-    ghosts.forEach(ghost => {
-        const randomDir = directions[Math.floor(Math.random() * directions.length)];
-        const newGhostX = ghost.x + randomDir.x;
-        const newGhostY = ghost.y + randomDir.y;
+    frameCount++;
 
-        if (maze[newGhostY][newGhostX] !== WALL) {
-            ghost.x = newGhostX;
-            ghost.y = newGhostY;
-        }
-    });
+    // Move ghosts randomly every 3rd frame
+    if (frameCount % 3 === 0) {
+        const directions = [{x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}];
+        ghosts.forEach(ghost => {
+            const randomDir = directions[Math.floor(Math.random() * directions.length)];
+            const newGhostX = ghost.x + randomDir.x;
+            const newGhostY = ghost.y + randomDir.y;
+
+            if (maze[newGhostY][newGhostX] !== WALL) {
+                ghost.x = newGhostX;
+                ghost.y = newGhostY;
+            }
+        });
+    }
 
     // Check collision with ghosts
     if (ghosts.some(ghost => pacman.x === ghost.x && pacman.y === ghost.y)) {
@@ -158,6 +163,7 @@ function resetGame() {
     ];
     score = 0;
     gameOver = false;
+    frameCount = 0;
     maze = JSON.parse(JSON.stringify(initialMaze));
     document.getElementById('scoreValue').textContent = score;
 }
