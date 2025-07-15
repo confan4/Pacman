@@ -10,7 +10,25 @@
     <div id="game-container">
         <canvas id="gameCanvas" width="448" height="496"></canvas>
         <div id="score">Score: <span id="scoreValue">0</span></div>
+        <div id="high-scores">
+            <h3>High Scores</h3>
+            <ol id="scoresList"></ol>
+        </div>
     </div>
+    
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2>Game Over!</h2>
+            <p>Your Score: <span id="finalScore">0</span></p>
+            <input type="text" id="playerName" placeholder="Enter your name" maxlength="50">
+            <div class="modal-buttons">
+                <button id="saveScoreBtn">Save Score</button>
+                <button id="playAgainBtn">Play Again</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 </body>
 </html>

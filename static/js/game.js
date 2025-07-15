@@ -104,6 +104,7 @@ function update() {
     if (ghosts.some(ghost => pacman.x === ghost.x && pacman.y === ghost.y)) {
         gameOver = true;
         gameOverSound.play();
+        showGameOverModal();
     }
 
     // Eat dot
@@ -212,6 +213,93 @@ document.addEventListener('keydown', (e) => {
         pacman.y = newY;
         pacman.direction = newDirection;
     }
+});
+
+async function loadHighScores() {
+    try {
+        const response = await fetch('/api/scores');
+        const scores = await response.json();
+        displayHighScores(scores);
+    } catch (error) {
+        console.error('Error loading high scores:', error);
+    }
+}
+
+function displayHighScores(scores) {
+    const scoresList = document.getElementById('scoresList');
+    scoresList.innerHTML = '';
+    
+    scores.forEach(score => {
+        const li = document.createElement('li');
+        li.textContent = `${score.player_name}: ${score.score}`;
+        scoresList.appendChild(li);
+    });
+}
+
+async function saveHighScore(playerName, score) {
+    try {
+        const response = await fetch('/api/scores', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                player_name: playerName,
+                score: score
+            })
+        });
+        
+        if (response.ok) {
+            loadHighScores();
+            return true;
+        } else {
+            const error = await response.json();
+            alert('Error saving score: ' + error.error);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error saving score:', error);
+        alert('Error saving score. Please try again.');
+        return false;
+    }
+}
+
+function showGameOverModal() {
+    const modal = document.getElementById('gameOverModal');
+    const finalScore = document.getElementById('finalScore');
+    finalScore.textContent = score;
+    modal.style.display = 'block';
+}
+
+function hideGameOverModal() {
+    const modal = document.getElementById('gameOverModal');
+    modal.style.display = 'none';
+    document.getElementById('playerName').value = '';
+}
+
+document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+    const playerName = document.getElementById('playerName').value.trim();
+    if (!playerName) {
+        alert('Please enter your name');
+        return;
+    }
+    
+    const success = await saveHighScore(playerName, score);
+    if (success) {
+        hideGameOverModal();
+        resetGame();
+        gameLoop();
+    }
+});
+
+document.getElementById('playAgainBtn').addEventListener('click', () => {
+    hideGameOverModal();
+    resetGame();
+    gameLoop();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadHighScores();
 });
 
 // Start the game
