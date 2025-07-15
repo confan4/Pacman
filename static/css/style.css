@@ -2,14 +2,18 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
     background-color: #000;
     font-family: Arial, sans-serif;
+    padding: 20px;
 }
 
 #game-container {
     position: relative;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
 }
 
 #gameCanvas {
@@ -22,4 +26,87 @@ body {
     left: 10px;
     color: #fff;
     font-size: 20px;
+}
+
+#high-scores {
+    background-color: #111;
+    border: 2px solid #00f;
+    padding: 20px;
+    min-width: 200px;
+    color: #fff;
+}
+
+#high-scores h3 {
+    margin-top: 0;
+    color: #ff0;
+    text-align: center;
+}
+
+#scoresList {
+    list-style: decimal;
+    padding-left: 20px;
+}
+
+#scoresList li {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background-color: #111;
+    margin: 15% auto;
+    padding: 30px;
+    border: 2px solid #00f;
+    width: 300px;
+    text-align: center;
+    color: #fff;
+    border-radius: 10px;
+}
+
+.modal-content h2 {
+    color: #ff0;
+    margin-top: 0;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #00f;
+    background-color: #222;
+    color: #fff;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: 1px solid #00f;
+    background-color: #222;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.modal-buttons button:hover {
+    background-color: #00f;
 }
