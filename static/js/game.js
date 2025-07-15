@@ -21,9 +21,15 @@ let score = 0;
 let gameOver = false;
 let frameCount = 0;
 
-// Audio
-const eatDotSound = new Audio('/static/audio/eat_dot.mp3');
-const gameOverSound = new Audio('/static/audio/game_over.mp3');
+let eatDotSound, gameOverSound;
+try {
+    eatDotSound = new Audio('/static/audio/eat_dot.mp3');
+    gameOverSound = new Audio('/static/audio/game_over.mp3');
+} catch (error) {
+    console.warn('Audio files not found, continuing without sound');
+    eatDotSound = { play: () => {} };
+    gameOverSound = { play: () => {} };
+}
 
 // Maze layout
 const initialMaze = [
@@ -66,6 +72,12 @@ let maze = JSON.parse(JSON.stringify(initialMaze));
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+const backgroundCanvas = document.createElement('canvas');
+backgroundCanvas.width = canvas.width;
+backgroundCanvas.height = canvas.height;
+const backgroundCtx = backgroundCanvas.getContext('2d');
+let backgroundRendered = false;
+
 // Load images
 const pacmanImg = new Image();
 pacmanImg.src = '/static/images/pacman.svg';
@@ -103,29 +115,55 @@ function update() {
     // Check collision with ghosts
     if (ghosts.some(ghost => pacman.x === ghost.x && pacman.y === ghost.y)) {
         gameOver = true;
-        gameOverSound.play();
+        try {
+            gameOverSound.play();
+        } catch (error) {
+            console.warn('Could not play game over sound');
+        }
     }
 
     // Eat dot
     if (maze[pacman.y][pacman.x] === DOT) {
         maze[pacman.y][pacman.x] = EMPTY;
-        score += 10;
-        document.getElementById('scoreValue').textContent = score;
-        eatDotSound.play();
+        const newScore = score + 10;
+        if (newScore !== score) {
+            score = newScore;
+            document.getElementById('scoreValue').textContent = score;
+        }
+        try {
+            eatDotSound.play();
+        } catch (error) {
+            console.warn('Could not play eat dot sound');
+        }
     }
+}
+
+function renderBackground() {
+    backgroundCtx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
+    
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            if (initialMaze[y][x] === WALL) {
+                backgroundCtx.fillStyle = 'blue';
+                backgroundCtx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+    }
+    backgroundRendered = true;
 }
 
 // Draw game state
 function draw() {
+    if (!backgroundRendered) {
+        renderBackground();
+    }
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(backgroundCanvas, 0, 0);
 
-    // Draw maze
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
-            if (maze[y][x] === WALL) {
-                ctx.fillStyle = 'blue';
-                ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            } else if (maze[y][x] === DOT) {
+            if (maze[y][x] === DOT) {
                 ctx.fillStyle = 'white';
                 ctx.beginPath();
                 ctx.arc(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2, DOT_SIZE / 2, 0, Math.PI * 2);
@@ -156,6 +194,14 @@ function draw() {
     }
 }
 
+function cloneMaze(originalMaze) {
+    const cloned = new Array(originalMaze.length);
+    for (let i = 0; i < originalMaze.length; i++) {
+        cloned[i] = originalMaze[i].slice();
+    }
+    return cloned;
+}
+
 // Reset game state
 function resetGame() {
     pacman = { x: 14, y: 23, direction: 0 };
@@ -168,7 +214,7 @@ function resetGame() {
     score = 0;
     gameOver = false;
     frameCount = 0;
-    maze = JSON.parse(JSON.stringify(initialMaze));
+    maze = cloneMaze(initialMaze);
     document.getElementById('scoreValue').textContent = score;
 }
 
